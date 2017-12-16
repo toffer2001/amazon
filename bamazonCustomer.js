@@ -50,46 +50,86 @@ function start(res) {
             }
         ])
         .then(function (answer) {
-            // console.log(res);
-                answer.item_id -= 1;
-                for (var i = 0; i < res.length; i++) {
-                    if (res[i].item_id == (answer.item_id) ) {
-                    var productID = answer.item_id;
-                    }
-                }
-            console.log("You selected " + res[productID].product_name);
-                // console.log("You want " + res[productID].stock_quantity);
+            
+            connection.query("SELECT * FROM products WHERE ?", { item_id: answer.item_id },function (err, data) {
+                if (err) throw err;
+                
+                // console.log(data);
+                console.log("You selected " + data[0].product_name);
+                // console.log("there are " + data[0].stock_quantity + " left.");
 
-            if (answer.units <= res[productID].stock_quantity) {
-                res[productID].stock_quantity -= answer.units;
-                connection.query("UPDATE products SET ? WHERE ?",
+                if (answer.units <= data[0].stock_quantity) {
+                    data[0].stock_quantity -= answer.units;
+                    connection.query("UPDATE products SET ? WHERE ?",
                         [
                             {
-                                stock_quantity: res[productID].stock_quantity
+                                stock_quantity: data[0].stock_quantity
                             },
                             {
-                                item_id: productID
+                                item_id: answer.item_id
                             }
                         ],
                         function (error) {
-                            if (error) throw err;
+                            if (error) throw error;
 
                         }
-                );
-                console.log("You ordered " + answer.units + " items and there are now " + res[productID].stock_quantity + " left.");
-                var orderTotal = res[productID].price * answer.units;
+                    );
+                    console.log("You ordered " + answer.units + " items and there are now " + data[0].stock_quantity + " left.");
+                var orderTotal = data[0].price * answer.units;
                 console.log("Your total order is $" + orderTotal);
                 console.log("--------------------------");
                 start(res);
                 }
-            
-            else {
+                
+                else {
                 console.log("Insufficient quantity! Please place order again");
                 console.log("--------------------------");
                 start(res);
-            };
-         });
-}
+                };
+            });
+        });
+    }
+
+
+                // answer.item_id -= 1;
+                // for (var i = 0; i < res.length; i++) {
+                //     if (res[i].item_id == (answer.item_id) ) {
+                //     var productID = answer.item_id;
+                //     }
+                // }
+            
+//                 // console.log("You want " + res[productID].stock_quantity);
+
+//             if (answer.units <= res[answer.item_id].stock_quantity) {
+//                 res[answer.item_id].stock_quantity -= answer.units;
+//                 connection.query("UPDATE products SET ? WHERE ?",
+//                         [
+//                             {
+//                                 stock_quantity: res[answer.item_id].stock_quantity
+//                             },
+//                             {
+//                                 item_id: answer.item_id
+//                             }
+//                         ],
+//                         function (error) {
+//                             if (error) throw err;
+
+//                         }
+//                 );
+//                 console.log("You ordered " + answer.units + " items and there are now " + res[answer.item_id].stock_quantity + " left.");
+//                 var orderTotal = res[answer.item_id].price * answer.units;
+//                 console.log("Your total order is $" + orderTotal);
+//                 console.log("--------------------------");
+//                 start(res);
+//                 }
+            
+//             else {
+//                 console.log("Insufficient quantity! Please place order again");
+//                 console.log("--------------------------");
+//                 start(res);
+//             };
+//          });
+// }
 
 
 
